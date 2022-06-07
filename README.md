@@ -48,6 +48,7 @@ And I hope to make more beautifuls websites and become an expert in front-end de
 <!-- This section should list any major frameworks that you built your project using. Here are a few examples.-->
 
 - [HTML]
+- [SASS]
 - [CSS] 
 - [React] (https://reactjs.org/)
 - [React-Icons] (https://react-icons.github.io/react-icons/)
