@@ -47,32 +47,40 @@ function App() {
 	const [responseAlreadySelected, setResponseAlreadySelected] = useState(false);
 	const [isReady, setIsReady] = useState(false);
 	const [countries, setCountries] = useState([]);
+	const [backupCountries, setBackupCountries] = useState([]);
 	const [currentCountry, setCurrentCountry] = useState();
 
 	const [indexUsed, setIndexUsed] = useState([]);
 	const [goodResponsesCount, setGoodResponsesCount] = useState(0);
 
+	const [isEnd, setIsEnd] = useState(false);
+
 	useEffect(() => {
 		countryService.findAll().then(data => {
-			const targetIndex = Math.floor(Math.random() * (data.length - 1));
-			const targetCountry = data[targetIndex];
-			setCurrentCountry(targetCountry);
-
-			let updatedCountries = data.filter((it, index) => index !== targetIndex);
-
-			const targetChoiceIndex = Math.floor(Math.random() * 4);
-			choices[targetChoiceIndex](targetCountry.name.common);
-
-			let i = 0;
-			choices
-				.filter((it, index) => index !== targetChoiceIndex)
-				.map(it => it(updatedCountries[i++].name.common));
-
-			setCurrentCorrectResponse(targetCountry.name.common);
-			setCountries(updatedCountries);
+			setBackupCountries(data);
+			nextPlay(data);
 			setIsReady(true);
 		});
-	}, [])
+	}, []);
+
+	function nextPlay(data) {
+		const targetIndex = Math.floor(Math.random() * (data.length - 1));
+		const targetCountry = data[targetIndex];
+		setCurrentCountry(targetCountry);
+
+		let updatedCountries = data.filter((it, index) => index !== targetIndex);
+
+		const targetChoiceIndex = Math.floor(Math.random() * 4);
+		choices[targetChoiceIndex](targetCountry.name.common);
+
+		let i = 0;
+		choices
+			.filter((it, index) => index !== targetChoiceIndex)
+			.map(it => it(updatedCountries[i++].name.common));
+
+		setCurrentCorrectResponse(targetCountry.name.common);
+		setCountries(updatedCountries);
+	}
 
 	function loadIconChoiceResult(targetContext) {
 		let targetChoiceContext;
@@ -106,6 +114,9 @@ function App() {
 		btnResponseD.current.classList.remove('response-btn--incorrect');
 		btnResponseD.current.classList.add('response-btn--neutre');
 		setChoiceDContext(ChoiceContext.NEUTRE);
+
+
+		setResponseAlreadySelected(false);
 	}
 
 	function removeResponseNeutreCssClassFromAllButtons() {
@@ -139,6 +150,13 @@ function App() {
 		}
 	}
 
+	function showResults() {
+		setTimeout(() => {
+			setIsEnd(true);
+			restoreCssClassesForBtn();
+		}, 1000);
+	}
+
 	function handleBtnChoiceA(e) {
 		e.preventDefault();
 		console.log('btnChoiceA');
@@ -157,9 +175,9 @@ function App() {
 			btnResponseA.current.classList.add('response-btn--incorrect');
 			setChoiceAContext(ChoiceContext.INCORRECT);
 			showCorrectResponse();
+			showResults();
 		}
 
-		setResponseAlreadySelected(true);
 	}
 
 	function handleBtnChoiceB(e) {
@@ -178,6 +196,7 @@ function App() {
 			btnResponseB.current.classList.add('response-btn--incorrect');
 			setChoiceBContext(ChoiceContext.INCORRECT);
 			showCorrectResponse();
+			showResults();
 		}
 
 		setResponseAlreadySelected(true);
@@ -200,6 +219,7 @@ function App() {
 			btnResponseC.current.classList.add('response-btn--incorrect');
 			setChoiceCContext(ChoiceContext.INCORRECT);
 			showCorrectResponse();
+			showResults();
 		}
 
 		setResponseAlreadySelected(true);
@@ -221,6 +241,7 @@ function App() {
 			btnResponseD.current.classList.add('response-btn--incorrect');
 			setChoiceDContext(ChoiceContext.INCORRECT);
 			showCorrectResponse();
+			showResults();
 		}
 
 		setResponseAlreadySelected(true);
@@ -235,24 +256,14 @@ function App() {
 		restoreCssClassesForBtn();
 		setResponseAlreadySelected(false);
 
-		const targetIndex = Math.floor(Math.random() * (countries.length - 1));
-		const targetCountry = countries[targetIndex];
-		setCurrentCountry(targetCountry);
+		nextPlay(countries);
+	}
 
-		let updatedCountries = countries.filter((it, index) => index !== targetIndex);
-
-		const targetChoiceIndex = Math.floor(Math.random() * 4);
-		choices[targetChoiceIndex](targetCountry.name.common);
-
-		console.log('targetChoiceIndex: ', targetChoiceIndex);
-
-		let i = 0;
-		choices
-			.filter((it, index) => index !== targetChoiceIndex)
-			.map(it => it(updatedCountries[i++].name.common));
-
-		setCurrentCorrectResponse(targetCountry.name.common);
-		setCountries(updatedCountries);
+	function handleBtnTryAgainEvent(e) {
+		e.preventDefault();
+		console.log('try again [event]');
+		nextPlay(backupCountries);
+		setIsEnd(false);
 	}
 
 	return (
@@ -261,38 +272,50 @@ function App() {
 			<div className='flex flex-col gap-3 mx-auto max-w-[500px] p-4'>
 				<div className='relative'>
 					<h1 className='pt-8 text-xl md:text-3xl text-white font-bold'>COUNTRY QUIZ</h1>
-					<img className='absolute top-0 right-0' src="./images/undraw_adventure_4hum.svg" alt="" />
+					{isEnd ? '' : <img className='absolute top-0 right-0' src="./images/undraw_adventure_4hum.svg" alt="" />}
 				</div>
 				{isReady ?
 					<div className='px-4 py-8 rounded-xl min-h-[400px] bg-[#f2f2f2]'>
-						<h2 className='py-8 text-[#2F527B] font-bold text-lg md:text-2xl'>{currentCountry.capital[0]} is the capital of </h2>
-						<div className='flex flex-col gap-6'>
-							<button ref={btnResponseA} onClick={handleBtnChoiceA} className='response-btn response-btn--neutre'>
-								<span className='text-lg'>A</span>
-								<span className='text-md'>{choiceA}</span>
-								{loadIconChoiceResult(TargetChoiceContext.A)}
-							</button>
-							<button ref={btnResponseB} onClick={handleBtnChoiceB} className='response-btn response-btn--neutre'>
-								<span className='text-lg'>B</span>
-								<span className='text-md'>{choiceB}</span>
-								{loadIconChoiceResult(TargetChoiceContext.B)}
-							</button>
-							<button ref={btnResponseC} onClick={handleBtnChoiceC} className='response-btn response-btn--neutre'>
-								<span className='text-lg'>C</span>
-								<span className='text-md'>{choiceC}</span>
-								{loadIconChoiceResult(TargetChoiceContext.C)}
-							</button>
-							<button ref={btnResponseD} onClick={handleBtnChoiceD} className='response-btn response-btn--neutre'>
-								<span className='text-lg'>D</span>
-								<span className='text-md'>{choiceD}</span>
-								{loadIconChoiceResult(TargetChoiceContext.D)}
-							</button>
-							<button onClick={handleBtnNext} className='bg-[#F9A826] hover:text-white hover:border-[#F9A826] font-sans font-semibold text-white flex items-center gap-4 border-[1px] border-slate-100 rounded-xl py-3 px-8 ml-auto'>
-								<span className='text-lg'>Next</span>
-							</button>
-
-						</div>
-					</div> : <div className='px-4 py-8 rounded-xl min-h-[400px] bg-[#f2f2f2]'><h2 className='py-8 text-[#2F527B] font-bold text-lg md:text-2xl'>Loading...</h2></div>
+						{isEnd ?
+							<div className='flex flex-col items-center  py-8 min-h-[50vh]'>
+								<img className='max-w-[200px] ' src="./images/undraw_winners_ao2o.svg" alt="" />
+								<h2 className=' text-[#2F527B] font-bold text-3xl md:text-5xl py-4'>Results</h2>
+								<p>You got <span className='inline-block text-green-500 text-3xl font-bold px-1'>{goodResponsesCount}</span> correct answers</p>
+								<button onClick={handleBtnTryAgainEvent} className='text-[#2F527B] font-semibold mt-auto border-[1px] border-[#1D355D] py-2 px-12 rounded'>Try again</button>
+							</div>
+							:
+							<>
+								<h2 className='py-8 text-[#2F527B] font-bold text-lg md:text-2xl'>{currentCountry.capital[0]} is the capital of </h2>
+								<div className='flex flex-col gap-6'>
+									<button ref={btnResponseA} onClick={handleBtnChoiceA} className='response-btn response-btn--neutre'>
+										<span className='text-lg'>A</span>
+										<span className='text-md'>{choiceA}</span>
+										{loadIconChoiceResult(TargetChoiceContext.A)}
+									</button>
+									<button ref={btnResponseB} onClick={handleBtnChoiceB} className='response-btn response-btn--neutre'>
+										<span className='text-lg'>B</span>
+										<span className='text-md'>{choiceB}</span>
+										{loadIconChoiceResult(TargetChoiceContext.B)}
+									</button>
+									<button ref={btnResponseC} onClick={handleBtnChoiceC} className='response-btn response-btn--neutre'>
+										<span className='text-lg'>C</span>
+										<span className='text-md'>{choiceC}</span>
+										{loadIconChoiceResult(TargetChoiceContext.C)}
+									</button>
+									<button ref={btnResponseD} onClick={handleBtnChoiceD} className='response-btn response-btn--neutre'>
+										<span className='text-lg'>D</span>
+										<span className='text-md'>{choiceD}</span>
+										{loadIconChoiceResult(TargetChoiceContext.D)}
+									</button>
+									<button onClick={handleBtnNext} className='bg-[#F9A826] hover:text-white hover:border-[#F9A826] font-sans font-semibold text-white flex items-center gap-4 border-[1px] border-slate-100 rounded-xl py-3 px-8 ml-auto'>
+										<span className='text-lg'>Next</span>
+									</button>
+								</div>
+							</>
+						}
+					</div>
+					:
+					<div className='px-4 py-8 rounded-xl min-h-[400px] bg-[#f2f2f2]'><h2 className='py-8 text-[#2F527B] font-bold text-lg md:text-2xl'>Loading...</h2></div>
 				}
 			</div>
 
