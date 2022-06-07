@@ -8,7 +8,7 @@ import { MdCheckCircleOutline, MdHighlightOff } from "react-icons/md";
 const ChoiceContext = {
 	CORRECT: 'correct',
 	INCORRECT: 'incorrect',
-	INVALID: 'invalid'
+	NEUTRE: 'neutre'
 };
 
 const TargetChoiceContext = {
@@ -24,22 +24,148 @@ function App() {
 	const [choiceC, setChoiceC] = useState('Swedah');
 	const [choiceD, setChoiceD] = useState('Austria');
 
-	const [choiceAContext, setChoiceAContext] = useState(ChoiceContext.CORRECT);
-	const [choiceBContext, setChoiceBContext] = useState(ChoiceContext.INVALID);
-	const [choiceCContext, setChoiceCContext] = useState(ChoiceContext.INCORRECT);
-	const [choiceDContext, setChoiceDContext] = useState(ChoiceContext.INVALID);
+	const [choiceAContext, setChoiceAContext] = useState(ChoiceContext.NEUTRE);
+	const [choiceBContext, setChoiceBContext] = useState(ChoiceContext.NEUTRE);
+	const [choiceCContext, setChoiceCContext] = useState(ChoiceContext.NEUTRE);
+	const [choiceDContext, setChoiceDContext] = useState(ChoiceContext.NEUTRE);
 
-	function loadIconChoice(targetContext) {
+	const btnResponseA = useRef();
+	const btnResponseB = useRef();
+	const btnResponseC = useRef();
+	const btnResponseD = useRef();
+
+	const [currentCorrectResponse, setCurrentCorrectResponse] = useState('Vietnam');
+	const [correctBtnContext, setCorrectBtnContext] = useState(TargetChoiceContext.A);
+
+	const [responseAlreadySelected, setResponseAlreadySelected] = useState(false);
+
+	function loadIconChoiceResult(targetContext) {
 		let targetChoiceContext;
 		if (targetContext === TargetChoiceContext.A) { targetChoiceContext = choiceAContext; }
-		if (targetContext === TargetChoiceContext.B) { targetChoiceContext = choiceBContext; }
-		if (targetContext === TargetChoiceContext.C) { targetChoiceContext = choiceCContext; }
-		if (targetContext === TargetChoiceContext.D) { targetChoiceContext = choiceDContext; }
+		else if (targetContext === TargetChoiceContext.B) { targetChoiceContext = choiceBContext; }
+		else if (targetContext === TargetChoiceContext.C) { targetChoiceContext = choiceCContext; }
+		else if (targetContext === TargetChoiceContext.D) { targetChoiceContext = choiceDContext; }
 
-		if (targetChoiceContext === ChoiceContext.INVALID) { return ''; }
+		if (targetChoiceContext === ChoiceContext.NEUTRE) { return ''; }
 		if (targetChoiceContext === ChoiceContext.CORRECT) { return <MdCheckCircleOutline size={20} className='ml-auto' /> }
 		if (targetChoiceContext === ChoiceContext.INCORRECT) { return <MdHighlightOff size={20} className='ml-auto' /> }
 	}
+
+	function removeResponseNeutreCssClassFromAllButtons() {
+		btnResponseA.current.classList.remove('response-btn--neutre');
+		btnResponseB.current.classList.remove('response-btn--neutre');
+		btnResponseC.current.classList.remove('response-btn--neutre');
+		btnResponseD.current.classList.remove('response-btn--neutre');
+	}
+
+	function showCorrectResponse() {
+		if (correctBtnContext === TargetChoiceContext.A) {
+			btnResponseA.current.classList.add('response-btn--correct');
+			setChoiceAContext(ChoiceContext.CORRECT);
+			loadIconChoiceResult(TargetChoiceContext.A);
+		}
+		else if (correctBtnContext === TargetChoiceContext.B) {
+			btnResponseB.current.classList.add('response-btn--correct');
+			setChoiceBContext(ChoiceContext.CORRECT);
+			loadIconChoiceResult(TargetChoiceContext.B);
+
+		}
+		else if (correctBtnContext === TargetChoiceContext.C) {
+			btnResponseC.current.classList.add('response-btn--correct');
+			setChoiceCContext(ChoiceContext.CORRECT);
+			loadIconChoiceResult(TargetChoiceContext.C);
+
+		}
+		else if (correctBtnContext === TargetChoiceContext.D) {
+			btnResponseD.current.classList.add('response-btn--correct');
+			setChoiceDContext(ChoiceContext.CORRECT);
+			loadIconChoiceResult(TargetChoiceContext.D);
+		}
+	}
+
+	function handleBtnChoiceA(e) {
+		e.preventDefault();
+		console.log('btnChoiceA');
+
+		if (responseAlreadySelected) { return; }
+
+		// remove neutre on all buttons
+		removeResponseNeutreCssClassFromAllButtons();
+
+		if (choiceA === currentCorrectResponse) {
+			btnResponseA.current.classList.add('response-btn--correct');
+			setChoiceAContext(ChoiceContext.CORRECT);
+		}
+		else {
+			btnResponseA.current.classList.add('response-btn--incorrect');
+			setChoiceAContext(ChoiceContext.INCORRECT);
+			showCorrectResponse();
+		}
+
+		setResponseAlreadySelected(true);
+	}
+
+	function handleBtnChoiceB(e) {
+		e.preventDefault();
+		console.log('btnChoiceB');
+		if (responseAlreadySelected) { return; }
+		// remove neutre on all buttons
+		removeResponseNeutreCssClassFromAllButtons();
+
+		if (choiceB === currentCorrectResponse) {
+			btnResponseB.current.classList.add('response-btn--correct');
+			setChoiceBContext(ChoiceContext.CORRECT);
+		}
+		else {
+			btnResponseB.current.classList.add('response-btn--incorrect');
+			setChoiceBContext(ChoiceContext.INCORRECT);
+			showCorrectResponse();
+		}
+
+		setResponseAlreadySelected(true);
+	}
+
+	function handleBtnChoiceC(e) {
+		e.preventDefault();
+		console.log('btnChoiceC');
+		if (responseAlreadySelected) { return; }
+
+		// remove neutre on all buttons
+		removeResponseNeutreCssClassFromAllButtons();
+
+		if (choiceC === currentCorrectResponse) {
+			btnResponseC.current.classList.add('response-btn--correct');
+			setChoiceCContext(ChoiceContext.CORRECT);
+		}
+		else {
+			btnResponseC.current.classList.add('response-btn--incorrect');
+			setChoiceCContext(ChoiceContext.INCORRECT);
+			showCorrectResponse();
+		}
+
+		setResponseAlreadySelected(true);
+	}
+
+	function handleBtnChoiceD(e) {
+		e.preventDefault();
+		console.log('btnChoiceD');
+		if (responseAlreadySelected) { return; }
+		// remove neutre on all buttons
+		removeResponseNeutreCssClassFromAllButtons();
+
+		if (choiceD === currentCorrectResponse) {
+			btnResponseD.current.classList.add('response-btn--correct');
+			setChoiceDContext(ChoiceContext.CORRECT);
+		}
+		else {
+			btnResponseD.current.classList.add('response-btn--incorrect');
+			setChoiceDContext(ChoiceContext.INCORRECT);
+			showCorrectResponse();
+		}
+
+		setResponseAlreadySelected(true);
+	}
+
 	return (
 		<div className="app-background font-sans">
 
@@ -51,26 +177,30 @@ function App() {
 				<div className='px-4 py-8 rounded-xl min-h-[400px] bg-[#f2f2f2]'>
 					<h2 className='py-8 text-[#2F527B] font-bold text-lg md:text-2xl'>Kuala Lumpur is the capital of </h2>
 					<div className='flex flex-col gap-6'>
-						<button className='hover:bg-[#F9A826] hover:text-white hover:border-[#F9A826] text-[#6066D0] font-sans font-semibold flex items-center gap-4 border-[1px] border-slate-400 rounded-xl py-3 px-4 w-full'>
+						<button ref={btnResponseA} onClick={handleBtnChoiceA} className='response-btn response-btn--neutre'>
 							<span className='text-lg'>A</span>
 							<span className='text-md'>{choiceA}</span>
-							{loadIconChoice(TargetChoiceContext.A)}
+							{loadIconChoiceResult(TargetChoiceContext.A)}
 						</button>
-						<button className='hover:bg-[#F9A826] hover:text-white hover:border-[#F9A826] text-[#6066D0] font-sans font-semibold flex items-center gap-4 border-[1px] border-slate-400 rounded-xl py-3 px-4 w-full'>
+						<button ref={btnResponseB} onClick={handleBtnChoiceB} className='response-btn response-btn--neutre'>
 							<span className='text-lg'>B</span>
 							<span className='text-md'>{choiceB}</span>
-							{loadIconChoice(TargetChoiceContext.B)}
+							{loadIconChoiceResult(TargetChoiceContext.B)}
 						</button>
-						<button className='hover:bg-[#F9A826] hover:text-white hover:border-[#F9A826] text-[#6066D0] font-sans font-semibold flex items-center gap-4 border-[1px] border-slate-400 rounded-xl py-3 px-4 w-full'>
+						<button ref={btnResponseC} onClick={handleBtnChoiceC} className='response-btn response-btn--neutre'>
 							<span className='text-lg'>C</span>
 							<span className='text-md'>{choiceC}</span>
-							{loadIconChoice(TargetChoiceContext.C)}
+							{loadIconChoiceResult(TargetChoiceContext.C)}
 						</button>
-						<button className='hover:bg-[#F9A826] hover:text-white hover:border-[#F9A826] text-[#6066D0] font-sans font-semibold flex items-center gap-4 border-[1px] border-slate-400 rounded-xl py-3 px-4 w-full'>
+						<button ref={btnResponseD} onClick={handleBtnChoiceD} className='response-btn response-btn--neutre'>
 							<span className='text-lg'>D</span>
 							<span className='text-md'>{choiceD}</span>
-							{loadIconChoice(TargetChoiceContext.D)}
+							{loadIconChoiceResult(TargetChoiceContext.D)}
 						</button>
+						<button className='bg-[#F9A826] hover:text-white hover:border-[#F9A826] font-sans font-semibold text-white flex items-center gap-4 border-[1px] border-slate-100 rounded-xl py-3 px-8 ml-auto'>
+							<span className='text-lg'>Next</span>
+						</button>
+
 					</div>
 				</div>
 			</div>

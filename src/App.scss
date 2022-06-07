@@ -4,3 +4,44 @@
 	background-position: center;
 	min-height: 100vh;
 }
+
+
+.response-btn {
+	@apply text-[#6066D0] font-sans font-semibold flex items-center gap-4 border-[1px] border-slate-400 rounded-xl py-3 px-4 w-full;
+
+
+	&--neutre {
+		&:hover {
+			@apply bg-[#F9A826] text-white border-[#F9A826];
+		}
+	}
+
+	&--correct {
+		background-color: #60BF88;
+		color: #fff;
+		border-color: #60BF88;
+
+		& * {
+			color: #fff;
+		}
+
+		&:hover {
+			background-color: #60BF88;
+		}
+	}
+
+	&--incorrect {
+		background-color: #ea8282;
+		color: #fff;
+		border-color: #ea8282;
+
+
+		& * {
+			color: #fff;
+		}
+
+		&:hover {
+			background-color: #ea8282;
+		}
+	}
+}
