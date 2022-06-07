@@ -1,6 +1,5 @@
 
 import { useEffect, useRef, useState } from 'react';
-import Footer from './components/Footer'
 import './App.scss';
 
 import { MdCheckCircleOutline, MdHighlightOff } from "react-icons/md";
@@ -383,7 +382,8 @@ function App() {
 			</div>
 
 
-			<Footer></Footer>
+			<p className="text-[#222] text-center p-4 font-medium mt-10">created by <span className='font-semibold text-[#111]'>houssam-developer</span> - devChallenges.io</p>
+
 		</div>
 	)
 }
