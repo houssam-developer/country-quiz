@@ -20,10 +20,22 @@ const TargetChoiceContext = {
 };
 
 function App() {
-	const [choiceA, setChoiceA] = useState('');
-	const [choiceB, setChoiceB] = useState('');
-	const [choiceC, setChoiceC] = useState('');
-	const [choiceD, setChoiceD] = useState('');
+	const [choiceA, setChoiceA] = useState({
+		name: '',
+		flag: undefined
+	});
+	const [choiceB, setChoiceB] = useState({
+		name: '',
+		flag: undefined
+	});
+	const [choiceC, setChoiceC] = useState({
+		name: '',
+		flag: undefined
+	});
+	const [choiceD, setChoiceD] = useState({
+		name: '',
+		flag: undefined
+	});
 	const [choices, setChoices] = useState([
 		setChoiceA,
 		setChoiceB,
@@ -41,7 +53,10 @@ function App() {
 	const btnResponseC = useRef();
 	const btnResponseD = useRef();
 
-	const [currentCorrectResponse, setCurrentCorrectResponse] = useState('Vietnam');
+	const [currentCorrectResponse, setCurrentCorrectResponse] = useState({
+		name: '',
+		flag: undefined
+	});
 	const [correctBtnContext, setCorrectBtnContext] = useState(TargetChoiceContext.A);
 
 	const [responseAlreadySelected, setResponseAlreadySelected] = useState(false);
@@ -54,6 +69,9 @@ function App() {
 	const [goodResponsesCount, setGoodResponsesCount] = useState(0);
 
 	const [isEnd, setIsEnd] = useState(false);
+	const [isFlag, setIsFlag] = useState(true);
+
+	const [tempoCounter, setTempoCounter] = useState(0);
 
 	useEffect(() => {
 		countryService.findAll().then(data => {
@@ -71,14 +89,26 @@ function App() {
 		let updatedCountries = data.filter((it, index) => index !== targetIndex);
 
 		const targetChoiceIndex = Math.floor(Math.random() * 4);
-		choices[targetChoiceIndex](targetCountry.name.common);
+		choices[targetChoiceIndex]({
+			name: targetCountry.name.common,
+			flag: targetCountry.flag
+		});
 
-		let i = 0;
+		let i = tempoCounter;
 		choices
 			.filter((it, index) => index !== targetChoiceIndex)
-			.map(it => it(updatedCountries[i++].name.common));
+			.map(it => {
+				let targetCountry = updatedCountries[i++];
+				return it({ name: targetCountry.name.common, flag: targetCountry.flag });
+			});
 
-		setCurrentCorrectResponse(targetCountry.name.common);
+		if (i > updatedCountries.length) { i = 0; }
+		setTempoCounter(i);
+
+		setCurrentCorrectResponse({
+			name: targetCountry.name.common,
+			flag: targetCountry.flag
+		});
 		setCountries(updatedCountries);
 	}
 
@@ -166,7 +196,7 @@ function App() {
 		// remove neutre on all buttons
 		removeResponseNeutreCssClassFromAllButtons();
 
-		if (choiceA === currentCorrectResponse) {
+		if ((!isFlag && choiceA.name === currentCorrectResponse.name) || (isFlag && choiceA.flag === currentCorrectResponse.flag)) {
 			btnResponseA.current.classList.add('response-btn--correct');
 			setGoodResponsesCount(goodResponsesCount + 1);
 			setChoiceAContext(ChoiceContext.CORRECT);
@@ -187,7 +217,7 @@ function App() {
 		// remove neutre on all buttons
 		removeResponseNeutreCssClassFromAllButtons();
 
-		if (choiceB === currentCorrectResponse) {
+		if ((!isFlag && choiceB.name === currentCorrectResponse.name) || (isFlag && choiceB.flag === currentCorrectResponse.flag)) {
 			btnResponseB.current.classList.add('response-btn--correct');
 			setGoodResponsesCount(goodResponsesCount + 1);
 			setChoiceBContext(ChoiceContext.CORRECT);
@@ -210,7 +240,7 @@ function App() {
 		// remove neutre on all buttons
 		removeResponseNeutreCssClassFromAllButtons();
 
-		if (choiceC === currentCorrectResponse) {
+		if ((!isFlag && choiceC.name === currentCorrectResponse.name) || (isFlag && choiceC.flag === currentCorrectResponse.flag)) {
 			btnResponseC.current.classList.add('response-btn--correct');
 			setGoodResponsesCount(goodResponsesCount + 1);
 			setChoiceCContext(ChoiceContext.CORRECT);
@@ -232,7 +262,7 @@ function App() {
 		// remove neutre on all buttons
 		removeResponseNeutreCssClassFromAllButtons();
 
-		if (choiceD === currentCorrectResponse) {
+		if ((!isFlag && choiceD.name === currentCorrectResponse.name) || (isFlag && choiceD.flag === currentCorrectResponse.flag)) {
 			btnResponseD.current.classList.add('response-btn--correct');
 			setGoodResponsesCount(goodResponsesCount + 1);
 			setChoiceDContext(ChoiceContext.CORRECT);
@@ -257,6 +287,8 @@ function App() {
 		setResponseAlreadySelected(false);
 
 		nextPlay(countries);
+
+		setIsFlag(!isFlag);
 	}
 
 	function handleBtnTryAgainEvent(e) {
@@ -264,6 +296,7 @@ function App() {
 		console.log('try again [event]');
 		nextPlay(backupCountries);
 		setIsEnd(false);
+		setGoodResponsesCount(0);
 	}
 
 	return (
@@ -284,34 +317,64 @@ function App() {
 								<button onClick={handleBtnTryAgainEvent} className='text-[#2F527B] font-semibold mt-auto border-[1px] border-[#1D355D] py-2 px-12 rounded'>Try again</button>
 							</div>
 							:
-							<>
-								<h2 className='py-8 text-[#2F527B] font-bold text-lg md:text-2xl'>{currentCountry.capital[0]} is the capital of </h2>
-								<div className='flex flex-col gap-6'>
-									<button ref={btnResponseA} onClick={handleBtnChoiceA} className='response-btn response-btn--neutre'>
-										<span className='text-lg'>A</span>
-										<span className='text-md'>{choiceA}</span>
-										{loadIconChoiceResult(TargetChoiceContext.A)}
-									</button>
-									<button ref={btnResponseB} onClick={handleBtnChoiceB} className='response-btn response-btn--neutre'>
-										<span className='text-lg'>B</span>
-										<span className='text-md'>{choiceB}</span>
-										{loadIconChoiceResult(TargetChoiceContext.B)}
-									</button>
-									<button ref={btnResponseC} onClick={handleBtnChoiceC} className='response-btn response-btn--neutre'>
-										<span className='text-lg'>C</span>
-										<span className='text-md'>{choiceC}</span>
-										{loadIconChoiceResult(TargetChoiceContext.C)}
-									</button>
-									<button ref={btnResponseD} onClick={handleBtnChoiceD} className='response-btn response-btn--neutre'>
-										<span className='text-lg'>D</span>
-										<span className='text-md'>{choiceD}</span>
-										{loadIconChoiceResult(TargetChoiceContext.D)}
-									</button>
-									<button onClick={handleBtnNext} className='bg-[#F9A826] hover:text-white hover:border-[#F9A826] font-sans font-semibold text-white flex items-center gap-4 border-[1px] border-slate-100 rounded-xl py-3 px-8 ml-auto'>
-										<span className='text-lg'>Next</span>
-									</button>
-								</div>
-							</>
+							isFlag ?
+								<>
+									<h2 className='py-8 text-[#2F527B] font-bold text-lg md:text-2xl'>{currentCountry.flag}  is flag of </h2>
+									<div className='flex flex-col gap-6'>
+										<button ref={btnResponseA} onClick={handleBtnChoiceA} className='response-btn response-btn--neutre'>
+											<span className='text-lg'>A</span>
+											<span className='text-md'>{choiceA.name}</span>
+											{loadIconChoiceResult(TargetChoiceContext.A)}
+										</button>
+										<button ref={btnResponseB} onClick={handleBtnChoiceB} className='response-btn response-btn--neutre'>
+											<span className='text-lg'>B</span>
+											<span className='text-md'>{choiceB.name}</span>
+											{loadIconChoiceResult(TargetChoiceContext.B)}
+										</button>
+										<button ref={btnResponseC} onClick={handleBtnChoiceC} className='response-btn response-btn--neutre'>
+											<span className='text-lg'>C</span>
+											<span className='text-md'>{choiceC.name}</span>
+											{loadIconChoiceResult(TargetChoiceContext.C)}
+										</button>
+										<button ref={btnResponseD} onClick={handleBtnChoiceD} className='response-btn response-btn--neutre'>
+											<span className='text-lg'>D</span>
+											<span className='text-md'>{choiceD.name}</span>
+											{loadIconChoiceResult(TargetChoiceContext.D)}
+										</button>
+										<button onClick={handleBtnNext} className='bg-[#F9A826] hover:text-white hover:border-[#F9A826] font-sans font-semibold text-white flex items-center gap-4 border-[1px] border-slate-100 rounded-xl py-3 px-8 ml-auto'>
+											<span className='text-lg'>Next</span>
+										</button>
+									</div>
+								</>
+								:
+								<>
+									<h2 className='py-8 text-[#2F527B] font-bold text-lg md:text-2xl'>{currentCountry.capital[0]} is the capital of </h2>
+									<div className='flex flex-col gap-6'>
+										<button ref={btnResponseA} onClick={handleBtnChoiceA} className='response-btn response-btn--neutre'>
+											<span className='text-lg'>A</span>
+											<span className='text-md'>{choiceA.name}</span>
+											{loadIconChoiceResult(TargetChoiceContext.A)}
+										</button>
+										<button ref={btnResponseB} onClick={handleBtnChoiceB} className='response-btn response-btn--neutre'>
+											<span className='text-lg'>B</span>
+											<span className='text-md'>{choiceB.name}</span>
+											{loadIconChoiceResult(TargetChoiceContext.B)}
+										</button>
+										<button ref={btnResponseC} onClick={handleBtnChoiceC} className='response-btn response-btn--neutre'>
+											<span className='text-lg'>C</span>
+											<span className='text-md'>{choiceC.name}</span>
+											{loadIconChoiceResult(TargetChoiceContext.C)}
+										</button>
+										<button ref={btnResponseD} onClick={handleBtnChoiceD} className='response-btn response-btn--neutre'>
+											<span className='text-lg'>D</span>
+											<span className='text-md'>{choiceD.name}</span>
+											{loadIconChoiceResult(TargetChoiceContext.D)}
+										</button>
+										<button onClick={handleBtnNext} className='bg-[#F9A826] hover:text-white hover:border-[#F9A826] font-sans font-semibold text-white flex items-center gap-4 border-[1px] border-slate-100 rounded-xl py-3 px-8 ml-auto'>
+											<span className='text-lg'>Next</span>
+										</button>
+									</div>
+								</>
 						}
 					</div>
 					:
